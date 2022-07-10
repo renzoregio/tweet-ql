@@ -5,17 +5,24 @@ const users = [
         id: "1",
         firstName: "Renzo",
         lastName: "Regio"
+    },
+    {
+        id: "2",
+        firstName: "John",
+        lastName: "Doe"
     }
 ]
 
 const tweets = [
     {
         id: "1",
-        text: "First Tweet"
+        text: "First Tweet",
+        userId: "2"
     },
     {
         id: "2",
-        text: "Second Tweet"
+        text: "Second Tweet",
+        userId: "1"
     }
 ]
 
@@ -24,6 +31,9 @@ const typeDefs = gql`
         id: ID!
         firstName: String!
         lastName: String!
+        """
+        First name and last name combined
+        """
         fullName: String!
     }
 
@@ -59,7 +69,13 @@ const resolvers = {
     },
     Mutation: {
         postTweet(_, { text, userId }) {
-            const tweet = { id: (tweets.length + 1).toString(), text }
+            const user = users.find(user => user.id === userId)
+            if (!user) {
+                console.log("ERROR")
+                return null
+            }
+
+            const tweet = { id: (tweets.length + 1).toString(), text, userId }
             tweets.push(tweet)
             return tweet
         },
@@ -77,6 +93,11 @@ const resolvers = {
     User: {
         fullName(root) {
             return `${root.firstName} ${root.lastName}`
+        }
+    },
+    Tweet: {
+        author({ userId }) {
+            return users.find(user => user.id === userId)
         }
     }
 }
