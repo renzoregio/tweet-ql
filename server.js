@@ -1,5 +1,12 @@
 import { ApolloServer, gql } from "apollo-server"
 
+const users = [
+    {
+        id: "1",
+        firstName: "Renzo",
+        lastName: "Regio"
+    }
+]
 
 const tweets = [
     {
@@ -15,9 +22,9 @@ const tweets = [
 const typeDefs = gql`
     type User {
         id: ID!
-        username: String!
         firstName: String!
         lastName: String!
+        fullName: String!
     }
 
     type Tweet {
@@ -29,6 +36,7 @@ const typeDefs = gql`
     type Query {
         allTweets: [Tweet!]!
         tweet(id: ID!): Tweet
+        allUsers: [User!]!
     }
 
     type Mutation {
@@ -44,6 +52,9 @@ const resolvers = {
         },
         tweet(_, { id }) {
             return tweets.find(tweet => tweet.id === id)
+        },
+        allUsers() {
+            return users
         }
     },
     Mutation: {
@@ -62,10 +73,16 @@ const resolvers = {
 
             return false
         }
+    },
+    User: {
+        fullName(root) {
+            return `${root.firstName} ${root.lastName}`
+        }
     }
 }
 
 const server = new ApolloServer({ typeDefs, resolvers })
+
 server.listen().then(({ url }) => {
     console.log(`Running on: ${url}`)
 })
